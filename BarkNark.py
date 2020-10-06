@@ -21,13 +21,10 @@ load_dotenv()
 account_sid = os.getenv('sid')
 auth_token = os.getenv('token')
 
-
 client = Client(account_sid, auth_token)
 
 
-app = Flask(__name__)
-
-
+# Dispenses treat
 def treat_dispenser():
     "Dispense Treat Raspberry Pi Placeholder"
     treat_dispenser.counter += 1
@@ -35,6 +32,7 @@ def treat_dispenser():
     return treat_dispenser.counter
 
 
+# Sprays mists
 def mist_dispenser():
     "Mists of Doom Raspberry Pi Placeholder"
     mist_dispenser.counter += 1
@@ -42,11 +40,13 @@ def mist_dispenser():
     return mist_dispenser.counter
 
 
+# Snaps photo from Raspberry Pi Cam
 def snap_photo():
     "Snap photo / video Raspberry Pi Placeholder"
     pass
 
 
+# Updates Google Sheet with the text content and phone number
 def update_gsheet(reply, number):
     # Google Spreadsheets auth
     scope = ['https://spreadsheets.google.com/feeds']
@@ -59,15 +59,19 @@ def update_gsheet(reply, number):
     print("gsheet updated")
 
 
+# Setting counters to 0
 treat_dispenser.counter = 0
 mist_dispenser.counter = 0
 
 
+# Flask, webpage displaying number and commands
+app = Flask(__name__)
 @app.route('/')
 def display():
     return '(555)-555-5555 | Text WOOF if she is barking, text TREAT if she is being a good girl!'
 
 
+# Twilio SMS handling and main script
 @app.route("/sms", methods=['GET', 'POST'])
 def sms_reply():
     """Respond to incoming calls with a simple text message."""
@@ -81,7 +85,7 @@ def sms_reply():
     if body.lower().strip() == "treat" and treat_dispenser.counter < 5:
         print("Good girls get all the treats!")
         treat_dispenser()
-        "snap photo function"
+        snap_photo()
         resp.message("She will receive a treat now, thanks for helping train this good girl!")
         update_gsheet(body, number)
 
@@ -92,20 +96,20 @@ def sms_reply():
     elif body.lower().strip() == "woof" and mist_dispenser.counter < 5:
         print("Good girls get all the treats!")
         mist_dispenser()
-        "snap photo function"
+        snap_photo()
         resp.message("Thank you for Narking on the Barking. She will endure the mists of doom!")
         update_gsheet(body, number)
 
 
     elif body.lower().strip() == "woof":
         print("We are out of water")
-        "snap photo function"
+        snap_photo()
         resp.message("The mists of doom have run out of water, we will refill soon!")
         update_gsheet(body, number)
 
     else:
         resp.message("We received your message, but it wasn't one of the valid commands (WOOF or TREAT). We will record it as feedback. Thank you!")
-        "snap photo function"
+        snap_photo()
         update_gsheet(body, number)
 
     return str(resp)
