@@ -109,6 +109,7 @@ def snap_photo():
 
 # Updates Google Sheet with the text content and phone number
 def update_gsheet(reply, number):
+    # TODO: add timestamp to each entry.
     # Google Spreadsheets auth
     scope = ['https://spreadsheets.google.com/feeds']
     gc = gspread.service_account(filename='client_secret.json')
@@ -124,26 +125,30 @@ def update_gsheet(reply, number):
 treat_dispenser.counter = 0
 mist_dispenser.counter = 0
 
-# Flask, webpage displaying number and commands
+
+# Flask Setup
 app = Flask(__name__)
 
 
+# Static page showing number to text and commands. Possibly to be displayed on balcony TV for passersby.
 @app.route('/')
 def display():
+    # TODO: make dynamic once a text is sent to us
     return '(555)-555-5555 | Text WOOF if she is barking, text TREAT if she is being a good girl!'
 
 
-# Twilio SMS handling and main script
+# Twilio SMS handling and main logic script
 @app.route("/sms", methods=['GET', 'POST'])
 def sms_reply():
     """Respond to incoming commands with a simple text message."""
 
     # TwiML response
     resp = MessagingResponse()
-    body = request.values.get('Body', None)
-    number = request.values.get('From', None)
-    # print(f"Message received from {number}, it said: {body}") #Use for debug
+    body = request.values.get('Body', None) # Get body of text message sent to us
+    number = request.values.get('From', None) # Get number of text message sent to us
+    # print(f"Message received from {number}, it said: {body}") # Use for debug
 
+    # Check text message for commands
     if body.lower().strip() == "treat" and treat_dispenser.counter < 5:
         print("Good girls get all the treats!")
         treat_dispenser()
